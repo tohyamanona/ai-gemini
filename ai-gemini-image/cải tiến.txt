@@ -1,0 +1,4 @@
+- nhập prompt hàng loạt
+- nhập bài viết hàng loạt
+- thêm tính năng tạo album
+- giới hạn nhiệm vụ theo ip (lạm dụng)
