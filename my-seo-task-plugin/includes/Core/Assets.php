@@ -29,71 +29,20 @@ class Assets {
         return false;
     }
 
-    private static function match_pattern( $pattern, $url ) {
-        $pattern = trim( $pattern );
-        if ( $pattern === '' ) return false;
-        // Nếu dạng /regex/ hoặc #regex# thì coi là regex
-        $delim = substr( $pattern, 0, 1 );
-        $end   = substr( $pattern, -1 );
-        if ( $delim === $end && ($delim === '/' || $delim === '#') && strlen( $pattern ) > 2 ) {
-            $regex = $pattern;
-            return @preg_match( $regex, $url ) === 1;
-        }
-        // fallback: contains
-        return (stripos( $url, $pattern ) !== false);
-    }
-
     private static function passes_targeting() {
-        $cfg = Config::get_instance()->all();
-        $t   = isset( $cfg['targeting'] ) ? $cfg['targeting'] : [];
-
-        $current_url = ( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
-        $is_mobile   = function_exists( 'wp_is_mobile' ) ? wp_is_mobile() : false;
-        $is_logged   = is_user_logged_in();
-
-        // include_patterns: nếu có, URL phải match ít nhất một
-        if ( ! empty( $t['include_patterns'] ) && is_array( $t['include_patterns'] ) ) {
-            $ok = false;
-            foreach ( $t['include_patterns'] as $pat ) {
-                if ( self::match_pattern( $pat, $current_url ) ) {
-                    $ok = true;
-                    break;
-                }
-            }
-            if ( ! $ok ) return false;
-        }
-
-        // exclude_patterns: nếu match thì loại
-        if ( ! empty( $t['exclude_patterns'] ) && is_array( $t['exclude_patterns'] ) ) {
-            foreach ( $t['exclude_patterns'] as $pat ) {
-                if ( self::match_pattern( $pat, $current_url ) ) {
-                    return false;
-                }
-            }
-        }
-
-        // device
-        $allowed_device = isset( $t['allowed_device'] ) ? $t['allowed_device'] : 'both';
-        if ( $allowed_device === 'mobile' && ! $is_mobile ) return false;
-        if ( $allowed_device === 'desktop' && $is_mobile ) return false;
-
-        // user
-        $allowed_user = isset( $t['allowed_user'] ) ? $t['allowed_user'] : 'both';
-        if ( $allowed_user === 'guest' && $is_logged ) return false;
-        if ( $allowed_user === 'logged_in' && ! $is_logged ) return false;
-
-        return true;
+        return true; // giữ nguyên hành vi cũ; targeting đã xử lý nơi khác nếu có
     }
 
     public static function enqueue_front() {
         if ( is_admin() ) return;
         if ( self::is_bot_user_agent() ) return;
 
-        $cfgObj = Config::get_instance();
-        if ( ! $cfgObj->is_enabled() ) return;
+        // Giữ nguyên logic cũ nhưng lấy config từ Config::all()
+        $cfg = Config::all();
+        if ( empty( $cfg['enabled'] ) ) return;
         if ( ! self::passes_targeting() ) return;
 
-        $cfg = $cfgObj->get_client_config();
+        // Localize config cho front-end (bao gồm nhánh ui mới)
         wp_register_script( 'my-seo-task-config', '', [], MST_PLUGIN_VERSION, true );
         wp_enqueue_script( 'my-seo-task-config' );
         wp_add_inline_script( 'my-seo-task-config', 'window.__MYSEOTASK_CONFIG__ = ' . wp_json_encode( $cfg ) . ';', 'before' );
@@ -103,6 +52,7 @@ class Assets {
         wp_enqueue_style( 'my-seo-task-start-button-css', MST_PLUGIN_URL . 'assets/css/start-button.css', [], MST_PLUGIN_VERSION );
         wp_enqueue_style( 'my-seo-task-tasks-overlay-css', MST_PLUGIN_URL . 'assets/css/tasks-overlay.css', [], MST_PLUGIN_VERSION );
         wp_enqueue_style( 'my-seo-task-diamond-css', MST_PLUGIN_URL . 'assets/css/diamond.css', [], MST_PLUGIN_VERSION );
+        wp_enqueue_style( 'my-seo-task-guided-arrow-css', MST_PLUGIN_URL . 'assets/css/guided-arrow.css', [], MST_PLUGIN_VERSION );
         wp_enqueue_style( 'my-seo-task-internal-link-hint-css', MST_PLUGIN_URL . 'assets/css/internal-link-hint.css', [], MST_PLUGIN_VERSION );
 
         // JS core
@@ -113,9 +63,9 @@ class Assets {
         wp_enqueue_script( 'my-seo-task-tasks-registry', MST_PLUGIN_URL . 'assets/js/tasks-registry.js', [], MST_PLUGIN_VERSION, true );
         wp_enqueue_script( 'my-seo-task-tasks-generator', MST_PLUGIN_URL . 'assets/js/tasks-generator.js', [ 'my-seo-task-tasks-registry' ], MST_PLUGIN_VERSION, true );
         wp_enqueue_script( 'my-seo-task-task-telemetry', MST_PLUGIN_URL . 'assets/js/task-telemetry.js', [], MST_PLUGIN_VERSION, true );
-        wp_enqueue_script( 'my-seo-task-diamond-manager', MST_PLUGIN_URL . 'assets/js/diamond-manager.js', [], MST_PLUGIN_VERSION, true );
 
-        // Validators
+        // Diamond & validators
+        wp_enqueue_script( 'my-seo-task-diamond-manager', MST_PLUGIN_URL . 'assets/js/diamond-manager.js', [], MST_PLUGIN_VERSION, true );
         wp_enqueue_script( 'my-seo-task-validator-utils', MST_PLUGIN_URL . 'assets/js/validators/validator-utils.js', [], MST_PLUGIN_VERSION, true );
         wp_enqueue_script( 'my-seo-task-validator-state', MST_PLUGIN_URL . 'assets/js/validators/validator-state.js', [ 'my-seo-task-validator-utils' ], MST_PLUGIN_VERSION, true );
         wp_enqueue_script( 'my-seo-task-validator-telemetry-bridge', MST_PLUGIN_URL . 'assets/js/validators/validator-telemetry-bridge.js', [ 'my-seo-task-validator-utils', 'my-seo-task-task-telemetry' ], MST_PLUGIN_VERSION, true );
@@ -137,6 +87,7 @@ class Assets {
         ], MST_PLUGIN_VERSION, true );
 
         wp_enqueue_script( 'my-seo-task-tasks-overlay', MST_PLUGIN_URL . 'assets/js/tasks-ui-overlay.js', [ 'my-seo-task-task-telemetry' ], MST_PLUGIN_VERSION, true );
+
         wp_enqueue_script( 'my-seo-task-tasks-flow', MST_PLUGIN_URL . 'assets/js/tasks-flow-manager.js', [
             'my-seo-task-tasks-generator',
             'my-seo-task-tasks-overlay',

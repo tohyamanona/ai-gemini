@@ -21,9 +21,9 @@
 
     let currentTask = null;
 
-    // ===== Gate for navigator (BALANCED) =====
+    // ===== Gate for navigator =====
     let gateTimer = null;
-    let gateEnabled = false;
+    let gateEnabled = gateCfg.enabled !== false; // mặc định true, tắt nếu chọn Off
 
     // fallback listeners: ghi nhận click/touch/keydown cho Telemetry (nếu cần)
     let onAnyInteractionBound = null;
@@ -38,8 +38,6 @@
         const suf = uniqueSuffix || 'ov';
         const gradA = `ov-d-grad-a-${suf}`;
         const gradB = `ov-d-grad-b-${suf}`;
-
-        // Same visual as existing overlay diamond, but unique ids to avoid collisions
         return `
 <svg class="my-seo-task-overlay-diamond-svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
   <defs>
@@ -55,7 +53,6 @@
       <stop offset="100%" stop-color="rgba(255,255,255,0.0)"/>
     </linearGradient>
   </defs>
-
   <path class="d-outer" d="M32 2 L50 14 L62 32 L50 50 L32 62 L14 50 L2 32 L14 14 Z" fill="url(#${gradA})"/>
   <path d="M32 2 L50 14 L32 22 L14 14 Z" fill="rgba(255,255,255,0.35)"/>
   <path d="M14 14 L32 22 L10 32 L2 32 Z" fill="rgba(255,255,255,0.18)"/>
@@ -280,118 +277,9 @@
     }
 
     // =========================
-    // Gate logic (BALANCED)
+    // Gate logic
     // =========================
-    function getDocMetrics() {
-        if (Telemetry && typeof Telemetry.getDocMetrics === 'function') return Telemetry.getDocMetrics();
-
-        const doc = document.documentElement;
-        const body = document.body;
-
-        const viewportH = window.innerHeight || doc.clientHeight || 0;
-        const scrollY = window.pageYOffset || doc.scrollTop || 0;
-
-        const scrollHeight = Math.max(
-            body.scrollHeight,
-            doc.scrollHeight,
-            body.offsetHeight,
-            doc.offsetHeight,
-            body.clientHeight,
-            doc.clientHeight
-        );
-
-        const maxScrollable = Math.max(scrollHeight - viewportH, 0);
-        const depthPercent = maxScrollable > 0 ? (scrollY / maxScrollable) * 100 : 100;
-
-        return { viewportH, scrollY, scrollHeight, maxScrollable, depthPercent };
-    }
-
-    function computeBaseGate(taskType) {
-        const { scrollHeight, viewportH } = getDocMetrics();
-        const pages = viewportH > 0 ? (scrollHeight / viewportH) : 1;
-
-        const cfgMinSeconds       = typeof gateCfg.min_seconds === 'number' ? gateCfg.min_seconds : null;
-        const cfgMinInteractions  = typeof gateCfg.min_interactions === 'number' ? gateCfg.min_interactions : null;
-        const cfgMinScrollPx      = typeof gateCfg.min_scroll_px === 'number' ? gateCfg.min_scroll_px : null;
-        const cfgMinDepthPercent  = typeof gateCfg.min_depth_percent === 'number' ? gateCfg.min_depth_percent : null;
-        const cfgMinPauseMs       = typeof gateCfg.min_pause_ms === 'number' ? gateCfg.min_pause_ms : null;
-
-        let baseSec;
-        let minInteractions;
-        let minDepthPercent;
-
-        switch (taskType) {
-            case 'collect_diamond':
-                baseSec = cfgMinSeconds ?? 24;
-                minInteractions = cfgMinInteractions ?? 8;
-                minDepthPercent = cfgMinDepthPercent ?? 16;
-                break;
-            case 'click_internal_link':
-            case 'click_content_image':
-            case 'click_content_image_find_diamond':
-                baseSec = cfgMinSeconds ?? 18;
-                minInteractions = cfgMinInteractions ?? 6;
-                minDepthPercent = cfgMinDepthPercent ?? 11;
-                break;
-            case 'scroll_to_percent':
-                baseSec = cfgMinSeconds ?? 14;
-                minInteractions = cfgMinInteractions ?? 5;
-                minDepthPercent = cfgMinDepthPercent ?? 9;
-                break;
-            default:
-                baseSec = cfgMinSeconds ?? 18;
-                minInteractions = cfgMinInteractions ?? 6;
-                minDepthPercent = cfgMinDepthPercent ?? 11;
-                break;
-        }
-
-        const lengthFactor = Math.min(2.2, Math.max(0, (pages - 1.2) * 0.55));
-        let gateSec = baseSec * (1 + lengthFactor * 0.35);
-        gateSec = Math.max(12, Math.min(60, gateSec));
-
-        const minScrollPx = cfgMinScrollPx ?? Math.round(Math.min(1500, Math.max(420, viewportH * (0.95 + lengthFactor * 0.55))));
-        const minPauseMs = cfgMinPauseMs ?? Math.round(Math.min(10000, Math.max(2600, 2600 + lengthFactor * 1200)));
-
-        return {
-            baseGateMs: Math.round(gateSec * 1000),
-            minInteractions,
-            minScrollPx,
-            minDepthPercent,
-            minPauseMs,
-        };
-    }
-
-    function computeEffectiveGateMs(task, baseGateMs) {
-        const reduceFactor = 0.6;
-        const minGateMs = Math.max(9000, Math.round(baseGateMs * reduceFactor));
-
-        if (!Telemetry || typeof Telemetry.getState !== 'function') return baseGateMs;
-        const s = Telemetry.getState();
-        if (!task) return baseGateMs;
-
-        if (task.type === 'collect_diamond') {
-            if (s.maxDepthPercent >= 40 && s.diamondsCollected === 0) return minGateMs;
-        }
-
-        if (task.type === 'click_internal_link') {
-            if (s.internalLinkClicksAttempted >= 3 && s.internalLinkClicksSuccess === 0) return minGateMs;
-        }
-
-        if (task.type === 'scroll_to_percent') {
-            if (typeof s.targetScrollPercent === 'number' && s.targetScrollPercent > 0) {
-                if (s.maxScrollPercentSeen >= (s.targetScrollPercent - 4)) return minGateMs;
-            }
-        }
-
-        return baseGateMs;
-    }
-
     function setNavGateEnabled(isEnabled) {
-        if (gateCfg.enabled === false) {
-            gateEnabled = false;
-            setNavVisible(false);
-            return;
-        }
         gateEnabled = !!isEnabled;
         if (!gateEnabled) setNavVisible(false);
     }
@@ -414,11 +302,21 @@
 
     function startGate(task) {
         cleanupGate();
-        setNavGateEnabled(false);
 
-        if (task && task.type === 'return_to_previous') return;
+        // Nếu gate tắt trong config -> luôn bật navigator, không chờ ngưỡng
+        if (gateCfg.enabled === false) {
+            setNavGateEnabled(true);
+            return;
+        }
 
-        const base = computeBaseGate(task.type);
+        // Đọc ngưỡng từ config (chấp nhận giá trị 0)
+        const minSeconds      = (typeof gateCfg.min_seconds === 'number')      ? gateCfg.min_seconds      : 18;
+        const minInteractions = (typeof gateCfg.min_interactions === 'number') ? gateCfg.min_interactions : 6;
+        const minScrollPx     = (typeof gateCfg.min_scroll_px === 'number')     ? gateCfg.min_scroll_px     : 600;
+        const minDepthPercent = (typeof gateCfg.min_depth_percent === 'number') ? gateCfg.min_depth_percent : 12;
+        const minPauseMs      = (typeof gateCfg.min_pause_ms === 'number')      ? gateCfg.min_pause_ms      : 2800;
+
+        const startedAt = Date.now();
 
         onAnyInteractionBound = function () {
             if (Telemetry && typeof Telemetry.onAnyInteraction === 'function') {
@@ -440,24 +338,18 @@
             const s = Telemetry && typeof Telemetry.getState === 'function' ? Telemetry.getState() : null;
             if (!s) return;
 
-            const now = Date.now();
-            const elapsed = now - (s.startedAt || now);
+            const elapsed = (Date.now() - startedAt) / 1000;
 
-            const effectiveGateMs = computeEffectiveGateMs(currentTask, base.baseGateMs);
+            const enoughTime         = elapsed >= minSeconds;
+            const enoughInteractions = (s.interactions || 0) >= minInteractions;
+            const enoughScroll       = (s.maxScrollDistance || 0) >= minScrollPx;
+            const enoughDepth        = (s.maxDepthPercent || 0) >= minDepthPercent;
+            const enoughPause        = (s.pauseMs || 0) >= minPauseMs;
 
-            const enoughTime = elapsed >= effectiveGateMs;
-            const enoughScroll = (s.maxScrollDistance || 0) >= base.minScrollPx;
-            const enoughDepth = (s.maxDepthPercent || 0) >= base.minDepthPercent;
+            const allow = enoughTime && enoughInteractions && enoughScroll && enoughDepth && enoughPause;
 
-            const enoughInteractions = (s.interactions || 0) >= base.minInteractions;
-            const enoughPauseOptional = (s.pauseMs || 0) >= base.minPauseMs;
-
-            const allow = enoughTime && enoughScroll && enoughDepth && (enoughInteractions || enoughPauseOptional);
-
-            if (allow) {
-                setNavGateEnabled(true);
-            }
-        }, 1000);
+            setNavGateEnabled(allow);
+        }, 800);
     }
 
     // =========================
@@ -527,13 +419,22 @@
 
         if (task.type === 'scroll_to_percent') {
             const need = (task.config && task.config.percent) || 50;
-            const m = getDocMetrics();
-            const maxScrollable = m.maxScrollable || 0;
+            const doc = document.documentElement;
+            const body = document.body;
+            const scrollY = window.pageYOffset || doc.scrollTop || 0;
+            const viewportH = window.innerHeight || doc.clientHeight || 0;
+            const scrollHeight = Math.max(
+                body ? body.scrollHeight : 0,
+                doc.scrollHeight,
+                body ? body.offsetHeight : 0,
+                doc.offsetHeight,
+                body ? body.clientHeight : 0,
+                doc.clientHeight
+            );
+            const maxScrollable = Math.max(scrollHeight - viewportH, 0);
             const targetScrollY = (need / 100) * maxScrollable;
 
-            const currentY = m.scrollY || 0;
-            const delta = targetScrollY - currentY;
-
+            const delta = targetScrollY - scrollY;
             return {
                 top: delta > 0 ? (window.innerHeight || 0) + 200 : -200,
                 bottom: delta > 0 ? (window.innerHeight || 0) + 260 : -140,

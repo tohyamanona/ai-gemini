@@ -17,24 +17,23 @@
     const TaskGenerator = window.MySeoTask.TaskGenerator || null;
 
     const MISSION_FLAG_KEY = 'MySeoTask_IsInMissionMode';
-    const BUTTON_SHOWN_KEY = 'MySeoTask_StartButtonShown';
     const BUTTON_SHOWN_COUNT_KEY = 'MySeoTask_StartButtonShownCount';
 
-    const SCROLL_THRESHOLD = typeof cfg.scroll_threshold === 'number' ? cfg.scroll_threshold : 0.5;
-    const DELAY_MS = typeof cfg.delay_ms === 'number' ? cfg.delay_ms : 1000;
-    const ONLY_IF_ELIGIBLE = cfg.only_if_eligible !== false; // default true
-    const MAX_SHOW_PER_SESSION = Number.isInteger(cfg.max_show_per_session) ? cfg.max_show_per_session : 3; // nới lên 3
+    // Tôn trọng giá trị 0 từ UI
+    const SCROLL_THRESHOLD = (typeof cfg.scroll_threshold === 'number') ? cfg.scroll_threshold : 0.5;
+    const DELAY_MS = (typeof cfg.delay_ms === 'number') ? cfg.delay_ms : 1000;
+    const ONLY_IF_ELIGIBLE = (typeof cfg.only_if_eligible !== 'undefined') ? !!cfg.only_if_eligible : true;
+    const MAX_SHOW_PER_SESSION = Number.isInteger(cfg.max_show_per_session) ? cfg.max_show_per_session : 3;
 
-    const BTN_TEXT = cfg.text && typeof cfg.text === 'string' ? cfg.text : 'Bắt đầu nhiệm vụ';
-    const BTN_DOM_ID = cfg.dom_id && typeof cfg.dom_id === 'string' ? cfg.dom_id : '';
+    const BTN_TEXT = (cfg.text && typeof cfg.text === 'string') ? cfg.text : 'Bắt đầu nhiệm vụ';
+    const BTN_DOM_ID = (cfg.dom_id && typeof cfg.dom_id === 'string') ? cfg.dom_id : '';
 
     let hasInserted = false;
     let hasClicked = false;
 
     function isInMissionMode() {
         try {
-            const raw = localStorage.getItem(MISSION_FLAG_KEY);
-            return raw === '1';
+            return localStorage.getItem(MISSION_FLAG_KEY) === '1';
         } catch (e) {
             return false;
         }
@@ -67,27 +66,6 @@
         return shownCountThisSession() >= MAX_SHOW_PER_SESSION;
     }
 
-    function randomAlignForMobile() {
-        const aligns = ['flex-start', 'center', 'flex-end'];
-        const idx = Math.floor(Math.random() * aligns.length);
-        return aligns[idx];
-    }
-
-    function randomAlignForDesktop(inner) {
-        const variants = [
-            { justify: 'flex-start', maxWidth: '480px' },
-            { justify: 'center', maxWidth: '480px' },
-            { justify: 'flex-end', maxWidth: '480px' },
-            { justify: 'flex-start', maxWidth: '640px' },
-            { justify: 'flex-end', maxWidth: '640px' },
-        ];
-        const idx = Math.floor(Math.random() * variants.length);
-        const v = variants[idx];
-
-        inner.style.justifyContent = v.justify;
-        inner.style.maxWidth = v.maxWidth;
-    }
-
     function canShowStartButtonForThisPage() {
         const pageType = window.MySeoTask.pageType || 'generic';
 
@@ -105,8 +83,6 @@
     }
 
     function createStartButtonElement() {
-        const isMobile = window.innerWidth <= 768;
-
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'my-seo-task-start-btn';
@@ -168,10 +144,21 @@
         const inner = document.createElement('div');
         inner.className = 'my-seo-task-start-btn-inner';
 
+        // giữ căn chỉnh random cũ
         if (window.innerWidth <= 768) {
-            inner.style.justifyContent = randomAlignForMobile();
+            const aligns = ['flex-start', 'center', 'flex-end'];
+            inner.style.justifyContent = aligns[Math.floor(Math.random() * aligns.length)];
         } else {
-            randomAlignForDesktop(inner);
+            const variants = [
+                { justify: 'flex-start', maxWidth: '480px' },
+                { justify: 'center', maxWidth: '480px' },
+                { justify: 'flex-end', maxWidth: '480px' },
+                { justify: 'flex-start', maxWidth: '640px' },
+                { justify: 'flex-end', maxWidth: '640px' },
+            ];
+            const v = variants[Math.floor(Math.random() * variants.length)];
+            inner.style.justifyContent = v.justify;
+            inner.style.maxWidth = v.maxWidth;
         }
 
         const btn = createStartButtonElement();
@@ -218,7 +205,13 @@
             delayTimeout = setTimeout(function () {
                 incrementShownCount();
                 createStartButton();
-            }, Math.max(0, DELAY_MS));
+            }, Math.max(0, DELAY_MS || 0));
+        }
+
+        // Nếu ngưỡng cuộn <= 0: hiện ngay (không cần cuộn)
+        if (SCROLL_THRESHOLD <= 0) {
+            triggerCreateWithDelay();
+            return;
         }
 
         function onScroll() {
@@ -235,6 +228,8 @@
         }
 
         window.addEventListener('scroll', onScroll, { passive: true });
+        // kiểm tra ngay lần đầu (trường hợp đã ở sâu)
+        onScroll();
     }
 
     function onReady(fn) {

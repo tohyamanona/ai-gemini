@@ -25,6 +25,7 @@ require_once MST_PLUGIN_DIR . 'includes/Admin/Pages/SettingsPage.php';
 require_once MST_PLUGIN_DIR . 'includes/Admin/Pages/TasksPage.php';
 require_once MST_PLUGIN_DIR . 'includes/Admin/Pages/RulesPage.php';
 require_once MST_PLUGIN_DIR . 'includes/Admin/Pages/AnalyticsPage.php';
+require_once MST_PLUGIN_DIR . 'includes/Admin/Pages/UIPage.php'; // mới
 require_once MST_PLUGIN_DIR . 'includes/Rest/Routes.php';
 require_once MST_PLUGIN_DIR . 'includes/Rest/Controllers/ConfigController.php';
 require_once MST_PLUGIN_DIR . 'includes/Rest/Controllers/EventsController.php';

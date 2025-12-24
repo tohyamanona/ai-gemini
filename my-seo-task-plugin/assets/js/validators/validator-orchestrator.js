@@ -12,6 +12,11 @@
     const image = M.image;
     const scroll = M.scroll;
 
+    // Đọc cấu hình Gate (chống cuộn nhanh)
+    const cfg = window.__MYSEOTASK_CONFIG__ || {};
+    const gateCfg = (cfg.ui && cfg.ui.gate) ? cfg.ui.gate : {};
+    const ANTI_FAST_SCROLL_MODE = gateCfg.anti_fast_scroll_mode || 'alert';
+
     const DiamondManager = NS.DiamondManager || null;
 
     const MAX_SCROLL_SPEED_PX_PER_MS = 4;
@@ -83,7 +88,11 @@
                 const speed = dy / dt;
                 if (speed > MAX_SCROLL_SPEED_PX_PER_MS && !state.hasShownFastScrollWarning) {
                     state.hasShownFastScrollWarning = true;
-                    alert('Bạn đang kéo quá nhanh, vui lòng kéo tự nhiên để tiếp tục nhiệm vụ.');
+                    if (ANTI_FAST_SCROLL_MODE === 'alert') {
+                        alert('Bạn đang kéo quá nhanh, vui lòng kéo tự nhiên để tiếp tục nhiệm vụ.');
+                    } else if (ANTI_FAST_SCROLL_MODE === 'strict') {
+                        fireFail('fast_scroll');
+                    } // mode "none": không làm gì
                 }
             }
         }
@@ -166,6 +175,11 @@
         M.state.resetFastScroll();
         M.state.clearDiamondsState();
         M.state.clearGuidedState();
+
+        // Reset cờ cảnh báo cuộn nhanh
+        state.hasShownFastScrollWarning = false;
+        state.lastScrollTime = null;
+        state.lastScrollY = null;
 
         arrow.clearGuidedHint();
         if (!state.activeTask) return;
