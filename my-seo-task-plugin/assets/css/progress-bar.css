@@ -1,0 +1,231 @@
+/* Thanh tiến trình nổi - phong cách hiện đại giống Flatsome */
+
+/* Container chính: card nhỏ ở GẦN chân màn hình (tương tự vị trí nút) */
+.my-seo-task-progress-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px; /* gần giống inner của nút (margin-bottom ~14–18px) */
+
+    z-index: 99990; /* THẤP HƠN nút start (99999) */
+
+    width: 280px;
+    max-width: 90vw;
+
+    background: #ffffff;
+    color: #111827;
+    border-radius: 10px;
+
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    overflow: hidden;
+
+    /* Hiệu ứng xuất hiện nhẹ */
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+        opacity 0.25s ease-out,
+        transform 0.25s ease-out;
+}
+
+/* Khi đã khởi tạo xong, thêm class này trong JS */
+.my-seo-task-progress-container.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Header: tiêu đề + % */
+.my-seo-task-progress-header {
+    padding: 10px 12px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Nhóm icon + text trái */
+.my-seo-task-progress-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Icon nhỏ */
+.my-seo-task-progress-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #2563eb, #22c55e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 11px;
+    box-shadow: 0 0 0 2px #e5f0ff;
+}
+
+/* Tiêu đề */
+.my-seo-task-progress-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #111827;
+}
+
+/* Subtext nhỏ bên dưới tiêu đề (tuỳ ý) */
+.my-seo-task-progress-subtitle {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* % bên phải */
+.my-seo-task-progress-percent-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #2563eb;
+}
+
+/* Thanh bar wrapper */
+.my-seo-task-progress-bar-wrapper {
+    position: relative;
+    width: 100%;
+    height: 7px;
+    background: #e5e7eb;
+    overflow: hidden;
+    border-radius: 999px;
+    margin: 0 12px 6px;
+}
+
+/* Thanh bar bên trong */
+.my-seo-task-progress-bar-inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #2563eb, #22c55e);
+    transition: width 0.25s ease-out;
+}
+
+/* Dải sáng chuyển động (giống hiệu ứng “active”) */
+.my-seo-task-progress-bar-inner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.8) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: my-seo-task-shine 1.8s linear infinite;
+    opacity: 0.9;
+}
+
+@keyframes my-seo-task-shine {
+    0% {
+        left: -40%;
+    }
+    100% {
+        left: 120%;
+    }
+}
+
+/* Footer */
+.my-seo-task-progress-footer {
+    padding: 0 12px 10px;
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Text bên trái footer */
+.my-seo-task-footer-left {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Text bên phải footer */
+.my-seo-task-footer-right {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Nút Làm mới nhiệm vụ */
+.my-seo-task-refresh-btn {
+    appearance: none;
+    border: 0;
+    outline: 0;
+    cursor: pointer;
+    padding: 3px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    box-shadow:
+        0 8px 18px rgba(34, 197, 94, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+    transition: transform 0.12s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    white-space: nowrap;
+}
+
+.my-seo-task-refresh-btn:hover {
+    filter: brightness(1.05);
+    box-shadow:
+        0 10px 20px rgba(34, 197, 94, 0.30),
+        0 0 0 1px rgba(255, 255, 255, 0.20) inset;
+}
+
+.my-seo-task-refresh-btn:active {
+    transform: translateY(1px);
+    box-shadow:
+        0 6px 14px rgba(34, 197, 94, 0.28),
+        0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+button.my-seo-task-footer {
+	margin: 0;
+}
+
+/* Mobile: full width dưới chân màn hình (card nhỏ kéo rộng hơn) */
+@media (max-width: 768px) {
+    .my-seo-task-progress-container {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        bottom: 20px; /* gần giống vị trí nút (inner margin-bottom ~12px) */
+        border-radius: 9px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
+    }
+
+    .my-seo-task-progress-header {
+        padding-top: 9px;
+        padding-bottom: 4px;
+    }
+
+    .my-seo-task-progress-title {
+        font-size: 12px;
+    }
+
+    .my-seo-task-progress-percent-label {
+        font-size: 12px;
+    }
+
+    .my-seo-task-progress-footer {
+        padding-bottom: 9px;
+    }
+}

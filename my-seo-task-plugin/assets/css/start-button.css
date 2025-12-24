@@ -1,0 +1,152 @@
+/* Nút BẮT ĐẦU NHIỆM VỤ - phong cách Flatsome, dính chân màn hình, nổi bật */
+
+/* Root wrapper chung cho nút - z-index cao để trên các overlay khác */
+.my-seo-task-start-btn-root {
+    position: relative;
+    z-index: 999999;
+}
+
+/* Container dính chân màn hình (desktop + mobile) */
+.my-seo-task-start-btn-wrapper {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    pointer-events: none;
+}
+
+/* Thanh chứa nút (flex, JS sẽ random justify-content) */
+.my-seo-task-start-btn-inner {
+    max-width: 480px;
+    margin: 0 auto 18px auto;
+    padding: 0 18px;
+    display: flex;
+    justify-content: center; /* JS override */
+    pointer-events: none;
+}
+
+/* Nút chính */
+.my-seo-task-start-btn {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 20px;
+    border-radius: 999px;
+
+    background: linear-gradient(135deg, #2563eb, #22c55e);
+    color: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.45);
+    transform: translateY(10px);
+    opacity: 0;
+
+    transition:
+        opacity 0.25s ease-out,
+        transform 0.25s ease-out,
+        box-shadow 0.2s ease-out,
+        transform 0.1s ease-out;
+}
+
+/* Khi hiển thị */
+.my-seo-task-start-btn.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hover / active */
+.my-seo-task-start-btn:hover {
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.55);
+}
+
+.my-seo-task-start-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.45);
+}
+
+/* Icon tròn nhỏ bên trái */
+.my-seo-task-start-btn-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+}
+
+/* Text trong nút */
+.my-seo-task-start-btn-text {
+    white-space: nowrap;
+}
+
+/* Desktop */
+@media (min-width: 769px) {
+    .my-seo-task-start-btn-inner {
+        max-width: 640px;
+        margin-bottom: 20px;
+    }
+
+    .my-seo-task-start-btn {
+        padding: 10px 22px;
+        font-size: 14px;
+    }
+
+    .my-seo-task-start-btn-text {
+        font-size: 14px;
+        font-weight: 700;
+    }
+}
+
+/* Mobile: nút gọn nhưng rõ, chỉ có icon nhỏ + text GO */
+@media (max-width: 768px) {
+    .my-seo-task-start-btn-inner {
+        margin-bottom: 14px;
+    }
+
+    .my-seo-task-start-btn {
+        padding: 9px 18px;
+        font-size: 14px;
+        border-radius: 999px;
+        gap: 6px;
+    }
+
+    .my-seo-task-start-btn-text {
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .my-seo-task-start-btn-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
+}
+
+/* Slot inline & right-middle (không dùng hiện tại, giữ tương thích) */
+.my-seo-task-start-btn-floating-right-middle {
+    position: fixed;
+    right: 20px;
+    bottom: 40vh;
+    pointer-events: auto;
+}
+
+.my-seo-task-start-btn-root-inline {
+    position: relative;
+    z-index: 10;
+}
+
+.my-seo-task-start-btn-inline-wrapper {
+    margin-top: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}

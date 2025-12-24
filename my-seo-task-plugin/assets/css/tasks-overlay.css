@@ -1,0 +1,318 @@
+/* Overlay nhiệm vụ */
+
+/* DESKTOP: đặt bên PHẢI, phía trên progress (cùng cụm) */
+.my-seo-task-overlay {
+    position: fixed;
+    right: 20px;
+    bottom: 133px;
+    z-index: 99991;
+
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+        opacity 0.2s ease-out,
+        transform 0.2s ease-out;
+
+    pointer-events: none;
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.my-seo-task-overlay.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.my-seo-task-overlay-box {
+    max-width: 280px;
+    background: #111827;
+    color: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
+    font-size: 13px;
+}
+
+.my-seo-task-overlay-progress-text {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+
+.my-seo-task-overlay-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.my-seo-task-overlay-icon {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.my-seo-task-overlay-title {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Diamond SVG icon in overlay */
+.my-seo-task-overlay-diamond-svg {
+    width: 34px;
+    height: 34px;
+    display: block;
+    filter:
+        drop-shadow(0 6px 14px rgba(15, 23, 42, 0.35))
+        drop-shadow(0 0 10px rgba(59, 130, 246, 0.45))
+        drop-shadow(0 0 14px rgba(168, 85, 247, 0.35));
+    animation:
+        myseo_overlay_diamond_hue 2.8s linear infinite,
+        myseo_overlay_diamond_pulse 1.6s ease-in-out infinite;
+}
+
+.my-seo-task-overlay-diamond-svg .d-outer {
+    stroke: rgba(255, 255, 255, 0.95);
+    stroke-width: 1.6;
+    paint-order: stroke fill;
+}
+
+@keyframes myseo_overlay_diamond_hue {
+    0%   { filter: hue-rotate(0deg) saturate(1.2) brightness(1.05); }
+    50%  { filter: hue-rotate(50deg) saturate(1.4) brightness(1.1); }
+    100% { filter: hue-rotate(0deg) saturate(1.2) brightness(1.05); }
+}
+
+@keyframes myseo_overlay_diamond_pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+}
+
+.my-seo-task-overlay-default-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Example area */
+.my-seo-task-overlay-example {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.my-seo-task-overlay-example-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.my-seo-task-overlay-example-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.my-seo-task-overlay-example-arrow {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+}
+
+.my-seo-task-overlay-link-arrow-mini {
+    width: 32px;
+    height: 32px;
+    display: block;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45));
+}
+
+.my-seo-task-overlay-example-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 8px;
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    max-width: 210px;
+    overflow: hidden;
+}
+
+.my-seo-task-overlay-example-link-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.my-seo-task-overlay-example-link-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================
+   Scroll navigator arrow (SIMPLE COLOR)
+   ============================ */
+.my-seo-task-scroll-nav {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    z-index: 999996;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+
+    /* defaults */
+    --nav-bg: #2563eb; /* blue */
+    --nav-border: rgba(255,255,255,0.85);
+    --nav-shadow: rgba(0,0,0,0.45);
+    --nav-arrow: rgba(255,255,255,0.98);
+}
+
+.my-seo-task-scroll-nav.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* up = blue */
+.my-seo-task-scroll-nav.is-up {
+    --nav-bg: #2563eb;
+}
+
+/* down = red */
+.my-seo-task-scroll-nav.is-down {
+    --nav-bg: #ef4444;
+}
+
+/* Circle background */
+.my-seo-task-scroll-nav-inner {
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+
+    background: var(--nav-bg);
+    border: 2px solid var(--nav-border);
+
+    box-shadow:
+        0 20px 52px var(--nav-shadow);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    animation: myseo_scroll_nav_bob 0.95s ease-in-out infinite;
+}
+
+/* Arrow */
+.my-seo-task-scroll-nav-arrow {
+    font-size: 64px;
+    line-height: 1;
+    font-weight: 900;
+    color: var(--nav-arrow);
+    text-shadow: 0 10px 22px rgba(0,0,0,0.35);
+}
+
+/* Hint label under circle */
+.my-seo-task-scroll-nav-hint {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.95);
+
+    background: rgba(17, 24, 39, 0.78);
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 7px 12px;
+    border-radius: 999px;
+    box-shadow: 0 16px 34px rgba(0,0,0,0.35);
+}
+
+@keyframes myseo_scroll_nav_bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .my-seo-task-overlay {
+        left: 50%;
+        right: auto;
+        bottom: 123px;
+        transform: translate(-50%, 8px);
+    }
+
+    .my-seo-task-overlay.is-visible {
+        transform: translate(-50%, 0);
+    }
+
+    .my-seo-task-overlay-box {
+        max-width: 82vw;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .my-seo-task-overlay-progress-text {
+        font-size: 10px;
+        margin-bottom: 6px;
+    }
+
+    .my-seo-task-overlay-title {
+        font-size: 13px;
+    }
+
+    .my-seo-task-overlay-icon {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+    }
+
+    .my-seo-task-overlay-diamond-svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .my-seo-task-overlay-example-link {
+        max-width: 64vw;
+    }
+
+    .my-seo-task-scroll-nav-inner {
+        width: 86px;
+        height: 86px;
+        box-shadow: 0 18px 46px rgba(0,0,0,0.45);
+    }
+
+    .my-seo-task-scroll-nav-arrow {
+        font-size: 58px;
+    }
+
+    .my-seo-task-scroll-nav-hint {
+        font-size: 11px;
+        padding: 7px 11px;
+    }
+
+}

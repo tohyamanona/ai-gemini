@@ -1,0 +1,150 @@
+/* Diamonds anchored to document (not fixed viewport) */
+
+.my-seo-task-diamond-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 0;
+    pointer-events: none;
+    z-index: 99990;
+}
+
+.my-seo-task-diamond {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    cursor: pointer;
+
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+    pointer-events: auto;
+
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out, filter 0.25s ease-out;
+
+    filter:
+        drop-shadow(0 12px 26px rgba(15, 23, 42, 0.45))
+        drop-shadow(0 0 20px rgba(59, 130, 246, 0.6))
+        drop-shadow(0 0 26px rgba(168, 85, 247, 0.55));
+}
+
+.my-seo-task-diamond.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Container icon */
+.my-seo-task-diamond-icon {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* SVG itself */
+.my-seo-task-diamond-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Outer path: stroke nhẹ */
+.my-seo-task-diamond-svg .d-outer {
+    stroke: rgba(255, 255, 255, 0.8);
+    stroke-width: 1.4;
+    paint-order: stroke fill;
+}
+
+/* Bỏ shimmer sweep/viền trắng, chỉ glow pulse */
+.my-seo-task-diamond-icon::before,
+.my-seo-task-diamond-icon::after {
+    content: none;
+}
+
+/* Glow pulse & hue shift */
+.my-seo-task-diamond-icon {
+    animation:
+        myseo_diamond_glow 1.6s ease-in-out infinite,
+        myseo_diamond_hue 3s linear infinite;
+}
+
+/* Sparkles twinkle */
+.my-seo-task-diamond-svg .d-sparkles {
+    transform-origin: 32px 32px;
+    animation: myseo_diamond_twinkle 1.4s ease-in-out infinite;
+}
+
+.my-seo-task-diamond:hover {
+    filter:
+        drop-shadow(0 14px 32px rgba(15, 23, 42, 0.55))
+        drop-shadow(0 0 24px rgba(59, 130, 246, 0.75))
+        drop-shadow(0 0 32px rgba(168, 85, 247, 0.65));
+}
+
+/* Animations */
+@keyframes myseo_diamond_glow {
+    0%, 100% { filter: drop-shadow(0 0 14px rgba(59,130,246,0.55)) drop-shadow(0 0 18px rgba(168,85,247,0.45)); transform: scale(1); }
+    50%      { filter: drop-shadow(0 0 22px rgba(59,130,246,0.75)) drop-shadow(0 0 26px rgba(168,85,247,0.60)); transform: scale(1.06); }
+}
+
+@keyframes myseo_diamond_hue {
+    0%   { filter: hue-rotate(0deg) saturate(1.15) brightness(1.02); }
+    50%  { filter: hue-rotate(40deg) saturate(1.25) brightness(1.07); }
+    100% { filter: hue-rotate(0deg) saturate(1.15) brightness(1.02); }
+}
+
+@keyframes myseo_diamond_twinkle {
+    0%   { opacity: 0.25; transform: scale(0.98); }
+    35%  { opacity: 0.95; transform: scale(1.05); }
+    70%  { opacity: 0.35; transform: scale(1.00); }
+    100% { opacity: 0.25; transform: scale(0.98); }
+}
+
+/* Hint */
+.my-seo-task-diamond-hint {
+    position: absolute;
+    top: -56px; /* đẩy lên cao hơn, không đè lên viên kim cương */
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.my-seo-task-diamond-hint-arrow {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 9px solid rgba(15, 23, 42, 0.86);
+    margin-bottom: 6px;
+}
+
+.my-seo-task-diamond-hint-text {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.86);
+    color: #f9fafb;
+    font-size: 11px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
+}
+
+.my-seo-task-diamond.show-hint .my-seo-task-diamond-hint {
+    opacity: 1;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .my-seo-task-diamond {
+        width: 60px;
+        height: 60px;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    .my-seo-task-diamond.is-visible {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
